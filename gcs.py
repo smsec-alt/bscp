@@ -3,17 +3,23 @@ import datetime
 import pandas as pd
 from io import BytesIO
 from google.cloud import storage
-
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'ServiceKey_GCS.json'
+from google.oauth2 import service_account
 
 
 class GCS:
-    def __init__(self, bucket_name: str = 'sm_data_bucket'):
+    def __init__(self, bucket_name: str = 'sm_data_bucket', streamlit: bool = False):
         self.bucket_name = bucket_name
+        self.streamlit = streamlit
         self.preprocessing()
     
     def preprocessing(self):
-        self.storage_client = storage.Client()
+        if self.streamlit:
+            import streamlit as st
+            credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"])
+            self.storage_client = storage.Client(credentials=credentials)
+        else:
+            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'ServiceKey_GCS.json'
+            self.storage_client = storage.Client()
         self.bucket = self.storage_client.get_bucket(self.bucket_name)        
 
     # define function that uploads a file from the bucket

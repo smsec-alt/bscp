@@ -19,9 +19,9 @@ with st.sidebar:
         currency = 'UAH'
 
 def main():
-    gcs = GCS('sm_data_bucket')
+    gcs = GCS('sm_data_bucket', streamlit=True)
 
-    df_temp = gcs.read_parquet(f'russia_cash_price/cpt.parquet.gzip')
+    df_temp = gcs.read_parquet('russia_cash_price/cpt.parquet.gzip')
     df = process_df(df_temp)   
     df_tax = gcs.read_csv('russia_cash_price/Export_Tax.csv', parse_dates=['date'])
 
