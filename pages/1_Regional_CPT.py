@@ -1,19 +1,20 @@
-import os
 import warnings
 import numpy as np
 import pandas as pd
 import streamlit as st
+from gcs import GCS
 from resources import process_df, get_seasonality_chart, get_daily_chart
 
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 st.set_page_config(page_title="Black Sea Cash Prices", layout='wide')
 
-PATH_DATA = r"/Users/semen/Desktop/data/Vitol/TBD/Devs/SNDs/Wheat/Russia/cpt/cash_prices_daily/output"
 
 def main():
-    cpt_path = os.path.join(PATH_DATA, 'cpt.parquet.gzip')
-    df_cpt = process_df(cpt_path)   
-    
+    gcs = GCS('sm_data_bucket', streamlit=True)
+
+    df_temp = gcs.read_parquet('russia_cash_price/cpt.parquet.gzip')
+    df_cpt = process_df(df_temp)   
+   
     with st.sidebar:
         comm_list = ['Wheat', 'Barley', 'Corn', 'Sunflower', 'Rapeseed']
         comm = st.selectbox("Crop", comm_list)
