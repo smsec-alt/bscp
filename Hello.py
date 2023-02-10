@@ -1,4 +1,3 @@
-import os
 import warnings
 import numpy as np
 import pandas as pd
@@ -24,7 +23,7 @@ def main():
 
     df_temp = gcs.read_parquet(f'russia_cash_price/cpt.parquet.gzip')
     df = process_df(df_temp)   
-    df_tax = gcs.read_csv(f'russia_cash_price/Export_Tax.csv', parse_dates=['date'])
+    df_tax = gcs.read_csv('russia_cash_price/Export_Tax.csv', parse_dates=['date'])
 
 
     last_tax = df_tax.loc[(df_tax['date']==df_tax['date'].max()) & (df_tax['grain']=='Wheat')& (df_tax['variable']=='tax')]['value'].values[0]
