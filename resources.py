@@ -147,3 +147,15 @@ def get_daily_chart(df: pd.DataFrame, title: str, currency: str, y_axis='price',
                           yaxis=dict(gridcolor='#F8F8F8', tickfont=dict(size=12)),
                           plot_bgcolor='white')
       return fig
+
+
+def get_freight_chart(freight_df: pd.DataFrame, regions: list, direction: str):
+  freight_pivot = freight_df.groupby([direction, 'delivery_time.from'], as_index=False)['payment.price_per_km'].mean()
+  freight_pivot = freight_pivot.loc[freight_pivot[direction].isin(regions)]
+  freight_pivot = freight_pivot.groupby(['delivery_time.from'], as_index=False)['payment.price_per_km'].mean()
+  print(freight_pivot)
+  freight_pivot['payment.price_per_km'] = freight_pivot['payment.price_per_km'].rolling(7).median()
+  freight_pivot = freight_pivot.dropna()
+  chart_title = f"Trucks costs to {', '.join(regions)}" if 'to' in direction else f"Trucks costs from {', '.join(regions)}"
+  fig = px.line(freight_pivot, x="delivery_time.from", y="payment.price_per_km", title=chart_title, labels={'delivery_time.from': '', 'payment.price_per_km': 'Cost per km'})
+  return fig

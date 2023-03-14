@@ -22,6 +22,8 @@ def main():
     gcs = GCS('sm_data_bucket', streamlit=True)
 
     df_temp = gcs.read_parquet('russia_cash_price/cpt.parquet.gzip')
+    df_ozk = gcs.read_parquet('russia_cash_price/ozk.parquet.gzip')
+    print(df_ozk)
     df = process_df(df_temp)   
     df_tax = gcs.read_csv('russia_cash_price/Export_Tax.csv', parse_dates=['date'])
 
@@ -91,12 +93,14 @@ def main():
         df_fob = df_cpt_fob.merge(df_fob_tax[['date', 'new_date', 'year', 'value']], on=['date', 'new_date', 'year'], how='left')
         df_fob['value'] = df_fob['value'].fillna(method='ffill')
         df_fob['price'] = df_fob['price_usd']+df_fob['value']+25
+        if grain == 'Wheat':
+            df_fob = df_ozk
         fig_tax_2 = get_seasonality_chart(df_fob, f'{grain} - FOB Implied', 'USD', y_axis_name='FOB Implied')
         col3_1.plotly_chart(fig_tax_1, use_container_width=True, height=800)
         col4_1.plotly_chart(fig_tax_2, use_container_width=True, height=800)
 
 
-        exp = st.expander(f" CPT Regional Spreads")
+        exp = st.expander(" CPT Regional Spreads")
         col5, col6, _ = exp.columns(3)
         crop = 'Wheat 4 Grade'
         region1 = col5.selectbox("Region 1", ['South', 'Central', 'Volga'])
